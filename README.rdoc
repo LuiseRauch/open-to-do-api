@@ -1,0 +1,3 @@
+## Open Todo API: External API With Authentication
+An API for a to-do list application. Users can authenticate and manage their information externally.
+Made with my mentor at [Bloc](http://bloc.io).
