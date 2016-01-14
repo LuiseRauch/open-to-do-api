@@ -31,3 +31,5 @@ gem 'jquery-rails'
 gem 'turbolinks'
 gem 'bootstrap-sass'
 gem 'active_model_serializers'
+# Used for encrypting User passwords
+gem 'bcrypt'
