@@ -13,11 +13,14 @@ RSpec.describe Api::UsersController, type: :controller do
       post :create, user: { name: new_user.name, password_digest: new_user.password_digest }
       expect(response).to have_http_status(401)
     end
+    it "DELETE destroy returns http unauthenticated" do
+      delete :destroy, id: my_user.id
+      expect(response).to have_http_status(401)
+    end
   end
 
   context "authenticated users" do
     before do
-      @new_user = create(:user)
       controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(my_user.name, my_user.password_digest)
     end
 
@@ -33,7 +36,7 @@ RSpec.describe Api::UsersController, type: :controller do
     end
 
     describe "POST create" do
-      before { post :create, user: { name: @new_user.name, password_digest: @new_user.password_digest } }
+      before { post :create, user: { name: my_user.name, password_digest: my_user.password_digest } }
 
       it "returns http success" do
         expect(response).to have_http_status(:success)
@@ -43,8 +46,16 @@ RSpec.describe Api::UsersController, type: :controller do
       end
       it "creates a user with the correct attributes" do
         hashed_json = JSON.parse(response.body)
-        expect(@new_user.name).to eq hashed_json["user"]["name"]
-        expect(@new_user.password_digest).to eq hashed_json["user"]["password_digest"]
+        expect(my_user.name).to eq hashed_json["user"]["name"]
+        expect(my_user.password_digest).to eq hashed_json["user"]["password_digest"]
+      end
+    end
+    
+    describe "DELETE destroy" do
+      it "deletes the user" do
+        delete :destroy, id: my_user.id
+        count = User.where({id: my_user.id}).size
+        expect(count).to eq 0
       end
     end
   end
