@@ -1,16 +1,15 @@
 require 'rails_helper'
 
 RSpec.describe User, type: :model do
-  let(:user) { User.create!(name: "User", password_digest: "password") }
+  let(:user) { create(:user) }
   it { should have_many(:lists) }
   # Shoulda tests for name
   it { should validate_presence_of(:name) }
   it { should validate_length_of(:name).is_at_least(1) }
 
   # Shoulda tests for password
-  it { should validate_presence_of(:password) }
-  it { should have_secure_password }
-  it { should validate_length_of(:password).is_at_least(6) }
+  it { should validate_presence_of(:password_digest) }
+  it { should validate_length_of(:password_digest).is_at_least(6) }
 
   describe "attributes" do
     it "should respond to name" do
@@ -24,7 +23,7 @@ RSpec.describe User, type: :model do
 
   describe "invalid user" do
     it "should be an invalid user due to blank name" do
-      user_with_invalid_name = User.new(name: "", password: "password")
+      user_with_invalid_name = User.new(name: "", password_digest: "password")
       expect(user_with_invalid_name).to_not be_valid
     end
   end
