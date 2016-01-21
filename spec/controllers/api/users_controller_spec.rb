@@ -17,11 +17,8 @@ RSpec.describe Api::UsersController, type: :controller do
 
   context "authenticated users" do
     before do
-      user = create(:user)
-      name = user.name
-      password_digest = user.password_digest
-
-      controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(name, password_digest)
+      @new_user = create(:user)
+      controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(my_user.name, my_user.password_digest)
     end
 
     describe "GET index" do
@@ -36,20 +33,18 @@ RSpec.describe Api::UsersController, type: :controller do
     end
 
     describe "POST create" do
+      before { post :create, user: { name: @new_user.name, password_digest: @new_user.password_digest } }
+
       it "returns http success" do
         expect(response).to have_http_status(:success)
       end
       it "returns json content type" do
-        new_user = build(:user)
-        post :create, user: { name: new_user.name, password_digest: new_user.password_digest }
         expect(response.content_type).to eq 'application/json'
       end
       it "creates a user with the correct attributes" do
-        new_user = build(:user)
-        post :create, user: { name: new_user.name, password_digest: new_user.password_digest }
         hashed_json = JSON.parse(response.body)
-        expect(new_user.name).to eq hashed_json["user"]["name"]
-        expect(new_user.password_digest).to eq hashed_json["user"]["password_digest"]
+        expect(@new_user.name).to eq hashed_json["user"]["name"]
+        expect(@new_user.password_digest).to eq hashed_json["user"]["password_digest"]
       end
     end
   end
