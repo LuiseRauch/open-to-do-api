@@ -9,6 +9,10 @@ RSpec.describe Api::ListsController, type: :controller do
       post :create, user_id: my_user.id, list: { name: my_list.name }
       expect(response).to have_http_status(401)
     end
+    it "PUT update returns http unauthenticated" do
+      put :update, user_id: my_user.id, id: my_list.id, list: {name: "List Name"}
+      expect(response).to have_http_status(401)
+    end
     it "DELETE destroy returns http unauthenticated" do
       delete :destroy, user_id: my_user.id, id: my_list.id
       expect(response).to have_http_status(401)
@@ -20,18 +24,44 @@ RSpec.describe Api::ListsController, type: :controller do
       controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(my_user.name, my_user.password_digest)
     end
 
+    # describe "GET index" do
+    #   before { assert_generates '/lists', controller: 'users', action: 'index' }
+    #
+    #   it "returns http success" do
+    #     expect(response).to have_http_status(:success)
+    #   end
+    #   it "returns json content type" do
+    #     expect(response.content_type).to eq 'application/json'
+    #   end
+    # end
+
     describe "POST create" do
+      before { post :create, user_id: my_user.id, list: { name: my_list.name } }
+
       it "returns http success" do
         expect(response).to have_http_status(:success)
       end
       it "returns json content type" do
-        post :create, user_id: my_user.id, list: { name: my_list.name }
         expect(response.content_type).to eq 'application/json'
       end
       it "creates a list with the correct attributes" do
-        post :create, user_id: my_user.id, list: { name: my_list.name }
         hashed_json = JSON.parse(response.body)
         expect(my_list.name).to eq hashed_json["name"]
+      end
+    end
+
+    describe "PUT update" do
+      before { put :update, user_id: my_user.id, id: my_list.id, list: {name: "List Name"} }
+
+      it "returns http success" do
+        expect(response).to have_http_status(:success)
+      end
+      it "returns json content type" do
+        expect(response.content_type).to eq 'application/json'
+      end
+      it "updates a list with the correct attributes" do
+        updated_list = List.find(my_list.id)
+        expect(updated_list.to_json).to eq response.body
       end
     end
 
