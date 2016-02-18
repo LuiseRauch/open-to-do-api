@@ -1,5 +1,7 @@
 class Api::UsersController < ApiController
   before_action :authenticated?
+  #
+  # user = current_user
 
   def index
     users = User.all
@@ -28,6 +30,5 @@ class Api::UsersController < ApiController
   private
   def user_params
     params.require(:user).permit(:name, :password_digest)
-  end
-
+  ends
 end

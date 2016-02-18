@@ -1,5 +1,6 @@
 class Api::ListsController < ApiController
   before_action :authenticated?
+  before_action :authorize_user#, except: [:index]
 
   def index
     lists = List.all
@@ -43,4 +44,10 @@ class Api::ListsController < ApiController
     params.require(:list).permit(:name, :permissions)
   end
 
+  # def authorize_user
+  #   list = List.find(params[:id])
+  #   unless current_user == list.user
+  #     render json: { errors: list.errors.full_messages }, status: :unprocessable_entity
+  #   end
+  # end
 end
