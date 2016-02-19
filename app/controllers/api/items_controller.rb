@@ -1,6 +1,5 @@
 class Api::ItemsController < ApiController
   before_action :authenticated?
-  before_action :authorize_user#, except: [:index]
 
   def index
     items = Item.all
@@ -34,10 +33,4 @@ class Api::ItemsController < ApiController
   def item_params
     params.require(:item).permit(:name, :completed)
   end
-  # def authorize_user
-  #   item = Item.find(params[:id])
-  #   unless current_user == item.user
-  #     render json: { errors: item.errors.full_messages }, status: :unprocessable_entity
-  #   end
-  # end
 end

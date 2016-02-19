@@ -2,8 +2,9 @@ require 'rails_helper'
 
 RSpec.describe Api::ItemsController, type: :controller do
   let(:my_user) { create(:user) }
+  let(:other_user) { User.create(name: "other_user", password_digest: "password") }
   let(:my_list) { create(:list, user: my_user) }
-  let(:my_item) { create(:item) }
+  let(:my_item) { create(:item, list: my_list) }
 
   context "unauthenticated users" do
     it "POST create returns http unauthenticated" do
@@ -62,4 +63,20 @@ RSpec.describe Api::ItemsController, type: :controller do
       end
     end
   end
+
+  context "authenticated and unauthorized users" do
+    before do
+      controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(other_user.name, other_user.password_digest)
+    end
+
+    it "POST create returns http forbidden" do
+      delete :create, list_id: my_list.id, item: { name: my_item.name }
+      expect(response).to have_http_status(403)
+    end
+    it "PUT update returns http forbidden" do
+      put :update, list_id: my_list.id, id: my_item.id, item: {name: "Item Name"}
+      expect(response).to have_http_status(403)
+    end
+  end
+
 end

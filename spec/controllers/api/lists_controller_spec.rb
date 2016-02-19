@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Api::ListsController, type: :controller do
   let(:my_user) { create(:user) }
+  let(:other_user) { User.create(name: "other_user", password_digest: "password") }
   let(:my_list) { create(:list, user: my_user) }
 
   context "unauthenticated users" do
@@ -19,21 +20,21 @@ RSpec.describe Api::ListsController, type: :controller do
     end
   end
 
-  context "authenticated users" do
+  context "authenticated and authorized users" do
     before do
       controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(my_user.name, my_user.password_digest)
     end
 
-    # describe "GET index" do
-    #   before { assert_generates '/lists', controller: 'users', action: 'index' }
-    #
-    #   it "returns http success" do
-    #     expect(response).to have_http_status(:success)
-    #   end
-    #   it "returns json content type" do
-    #     expect(response.content_type).to eq 'application/json'
-    #   end
-    # end
+    describe "GET index" do
+      it "returns http success" do
+        get :index, user_id: my_user.id
+        expect(response).to have_http_status(:success)
+      end
+      it "returns json content type" do
+        get :index, user_id: my_user.id
+        expect(response.content_type).to eq 'application/json'
+      end
+    end
 
     describe "POST create" do
       before { post :create, user_id: my_user.id, list: { name: my_list.name } }
@@ -71,6 +72,21 @@ RSpec.describe Api::ListsController, type: :controller do
         count = List.where({id: my_list.id}).size
         expect(count).to eq 0
       end
+    end
+  end
+
+  context "authenticated and unauthorized users" do
+    before do
+      controller.request.env['HTTP_AUTHORIZATION'] = ActionController::HttpAuthentication::Basic.encode_credentials(other_user.name, other_user.password_digest)
+    end
+
+    it "PUT update returns http forbidden" do
+      put :update, user_id: my_user.id, id: my_list.id, list: {name: "List Name"}
+      expect(response).to have_http_status(403)
+    end
+    it "DELETE destroy returns http forbidden" do
+      delete :destroy, user_id: my_user.id, id: my_list.id
+      expect(response).to have_http_status(403)
     end
   end
 end
