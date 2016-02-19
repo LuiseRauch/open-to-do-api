@@ -26,7 +26,6 @@ RSpec.describe Api::UsersController, type: :controller do
 
     describe "GET index" do
       before { get :index }
-
       it "returns http success" do
         expect(response).to have_http_status(:success)
       end
@@ -50,7 +49,7 @@ RSpec.describe Api::UsersController, type: :controller do
         expect(my_user.password_digest).to eq hashed_json["user"]["password_digest"]
       end
     end
-    
+
     describe "DELETE destroy" do
       it "deletes the user" do
         delete :destroy, id: my_user.id
